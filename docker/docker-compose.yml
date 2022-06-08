@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  saltmaster:
+    container_name: salt-master
+    hostname: master
+    image: manuvenk/salt:master
+    build: ./salt-master/
+    ports:
+      - "4505:4505"
+      - "4506:4506"
+
+  saltminion1:
+    container_name: saltminion-1
+    hostname: minion1
+    image: manuvenk/salt:minion
+    build: ./salt-minion/
+
+  salt-minion-dev:
+    container_name: salt-minion-dev
+    hostname: salt-minion-dev
+    image: manuvenk/salt:minion
+    build: ./salt-minion-dev/
+
+  saltminion1:
+    container_name: salt-minion-prod
+    hostname: salt-minion-prod
+    image: manuvenk/salt:minion
+    build: ./salt-minion-prod/

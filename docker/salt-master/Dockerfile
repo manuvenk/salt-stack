@@ -1,0 +1,7 @@
+#USE UBUNTU AS BASE IMAGE
+FROM saltstack/salt
+
+#COPY A FILE FROM HOST TO CONTAINER
+COPY roots.conf /etc/salt/master.d/
+
+EXPOSE 4505

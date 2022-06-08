@@ -1,0 +1,347 @@
+SALT
+=====
+Youtube Link: 
+
+Salt is a configuration management tool which helps to configure more than one machine in a network, monitor the changes etc.
+
+
+Salt Terminology
+-------------------
+
+1.Master- holds the files and excution commands that will be send to minions to configure the servers.
+2.Minion- Salt minions are your servers that actually run your applications and services When setup in Laptop and all both Master and minions will be the same machine.
+3.States - To determine a machines state. Can be called as a configuration state of a machine etc.
+4.Modules - Salt modules are the functions called by the salt command for doing a particular task
+5.salt-call - Command run to invoke different salt states and different execution commands.
+
+
+
+SALT MODULES
+-----------------
+1.Grains - Gathers system information
+2.Execution - Execution modules, 
+ #execute actions on machines.
+ #Runs commands and installes packages
+3.States - State Modules - Make sure that the state matches the current config set. Multiplatform
+4.Renderers - Render modules - To check.Analyse the requiremts/Data/Dataset that we need to fetch and converting it to a type of dictionary value for being prcessed by salt. So the best thing is that we can write the same in any language like, python, Jason, hjason etc and that will be translated.
+
+
+Salt is written using python.
+
+Minions are the agents running on machines to be controlled.
+
+Salt is also available as salt cloud.
+
+
+salt -G 'os:Arch' rootconf.say_hello  - This will run the python script in all the machines which matches for OS=Arch linux | rootconf.py is the file in which we will write the python script.
+
+SALT-SSH - can be used for agentless aproach. No need to install a agent in the mahines that we wish to control.
+
+PILLARS - Private data of systems.
+
+REACTOR - Event driven system that can be configured to listen for events from minions and take a predefined action. Other 3rd party applications can also be set like eg: Jenkins etc can be set to sent events in the reactors even bus and act.
+
+
+SALT EXECUTION MODULES: https://docs.saltproject.io/en/latest/ref/modules/all/index.html
+
+SALT COMMAND TO BE USED IS LIKE:  salt <target>  <execution-module> <extra commands or options>
+eg: salt target1 cmd.run uptime  | This will run the command in all the machine installed with minions and retun the o/p.
+
+
+INSTALLATION AND SALT STACK IN UBUNTU 18.04/20.04 using PIP
+==============================================================
+#apt install python3-pip
+
+#pip3 install salt---------------------------- DO IT IN BOTH MASTER AND MINION SERVER
+
+#mkdir /etc/salt
+
+#cd /etc/salt
+
+#mkdir master.d minion.d ----------- CREATE master.d file in SALT-MASTER SERVER AND SAME FOR MINION FILE
+
+#cd master.d
+
+#and create a 'roots.conf'file in which there will be information about where the root configuration files will exist.
+
+#vim roots.conf   with contents;
+
+====
+file_roots:
+  base:
+    - /srv/salt/base
+====
+
+
+
+#mkdir -p /srv/salt/base
+
+cd /etc/salt/minion.d  - Now here in the minions config we need to specify the master details to which minions can connect to. --- TO BE DONE IN SALT MINION
+
+#vim master.conf
+
+======
+master: localhost
+======
+
+
+
+#salt-master -d | to run master in demon mode--------------- RUN THE SAME IN SALT-MASTER SERVER
+
+
+#vim /etc/salt/minion_id  and set the name of minion to something of your choice.----- IN MINION SERVER
+
+===
+test_minion_local_server
+===
+
+
+
+THE BELOW COMMANDS NEEDS TO BE RUN IN SALT-MASTER
+---------------------------------------------------
+
+
+#after that try listing the keys using the command;
+
+salt-key
+
+====
+root@test:/etc/salt# salt-key
+Accepted Keys:
+Denied Keys:
+Unaccepted Keys:
+test_minion_local_server
+Rejected Keys:
+====
+
+
+
+
+#There is one key to be accepted so, accept that using the command:  salt-key -a "test_m*"  | We can also use the full name if needed but using *is more easierfor now.
+
+====
+root@test:/etc/salt# salt-key -a "test_m*"
+The following keys are going to be accepted:
+Unaccepted Keys:
+test_minion_local_server
+Proceed? [n/Y] y
+Key for minion test_minion_local_server accepted.
+=====
+
+
+
+
+#Now test to see if the ping works fine to the minion;
+
+salt 'test_minion_local_server' test.ping 
+
+====
+root@test:/etc/salt# salt 'test*' test.ping
+test_minion_local_server:
+    True
+=====
+
+
+
+NOTE: AFTER YOU RESTART THE SALT-MASTER/SALT-MINION YOU MAY HAVE TO START THE MASTER/MINION DEMON AGAIN USING COMMAND: salt-master -d  AND salt-minion -d WITH ROOT PRIVILAGES.
+
+
+
+BASIC SALT CLI COMMANDS
+==========================
+
+SALT EXECUTION MODULE: https://docs.saltproject.io/en/latest/ref/modules/all/index.html
+
+
+MODULE TO ADD A USER: salt '*' user.add <USER NAME>
+
+TO DELETE A USER: salt '*' user.delete 'manu' remove=True  | remove=True means to remove home dir also.
+TO APPEND A LINE TO A FILE: HERE ADDING TO /etc/motd FILE:  salt '*' file.append /etc/motd 'HAVE A GREAT DAY' | salt '*' file.append <file path> '<text to append>
+TO INSTALL PACKAGE: salt '*' pkg.install <name of package(s)> |  salt "*' pkg.install git nginx
+TO REMOVE A PACKAGE: salt '*' pkg.remove <package(S) name>
+
+
+SALT PILLARS, GRAINS AND SALT UTIL
+======================================
+
+PILLARS ARE AN OPTION TO TRANSFER THE DATA IN BETWEEN MASTER AND MINIONS IN A RESTRICTED MANNER IN WHICH THE DATA TO BE SENT TO WILL BE RESTRICTED WITH TARGET MNION/MASTER AGENT SET SO THAT DATA WILL ONLY BE SENT TO THE TARGET SERVER. NOW THE IN THE NEW WAY, WE USE VAULT TO ENCRYPT THE DATA AND DECRYPT AT THE TARGET END.
+
+
+
+
+SALT: STATE FILE
+==================
+Ref Link: https://docs.saltproject.io/en/latest/topics/tutorials/starting_states.html#:~:text=The%20core%20of%20the%20Salt,is%20often%20called%20configuration%20management.
+
+STATE FILE WILL HAVE ALL THE SALTS-MODULES SET AND REQURED TO ACHEIVE A PARTICULAR STATE OR SETUP WHICH WE CAN RUN TO SET TAGET MINIONS
+
+AND WE CAN USE THE SAME TO RERUN AND SET MINIONS TO A PARTICULAR STATE WHEN REQUIRED.
+
+FILES REQUIRED
+-----------------
+
+top.sls - THIS FILE WILL HAVE THE NAME OF THE MINIONS ETC AND EITHER OF EXCUTING IN ONE MINION, THIS WILL TARGET THE ALL MINIONS AND WILL ONLY APPLY CHANAGES IN THOSE MINIONS, WHICH IS DEFINED THERE.
+--------
+
+'*':
+
+'test_minion_local_server':
+- apache
+
+FOLDER: apache
+
+INSIDE THE ABOVE FOLDER, CREATE A FILE NAMED: init.sls, index.html
+
+init.sls
+----------
+
+install_apache:
+  pkg.installed:
+    - pkgs:
+      - apache2
+      
+index_html:
+  file.managed:
+    - name: /var/www/html/index.html
+    - user: apache
+    - group: apache
+    - mode: 644
+    - source: salt://apache/index.html
+    
+apache_service:
+  service.running:
+    - name: apache2
+    - enable: True
+    
+    
+    
+index.html
+------------
+
+Hello World!! This is Salt!
+
+
+
+Now after all the files are done, run the command: salt '*' state.sls apache
+
+
+
+SALTSTACK-TOP FILE
+=====================
+Ref: https://docs.saltproject.io/en/latest/ref/states/top.html
+
+MULTIPLE TOP FILES CAN BE SET LIKE QA, PROD ETC. 
+
+
+In Salt, the file which contains a mapping between groups of machines on a network and the configuration roles that should be applied to them is called a top file.
+
+
+
+
+
+
+
+
+
+RUN SALT-MINION IN A CONTAINER
+=================================
+
+Image file: https://hub.docker.com/r/saltstack/salt/tags
+
+
+
+Docker file
+----------------
+FROM saltstack/salt
+
+RUN echo "master: 192.168.56.105" > /etc/salt/minion.d/master.conf; \ #To set master IP
+    echo "qa_minion_local_server" > /etc/salt/minion_id  # To name the Minion
+    
+ENTRYPOINT salt-minion -d
+CMD tail -f /var/log/dpkg.log
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Dockerfile
+-------------
+FROM ubuntu:20.04
+
+RUN apt-get update -y; \
+    apt install python3-pip -y; \
+    pip3 install salt; \
+    mkdir -p /etc/salt/minion.d; \
+    echo "master: 192.168.56.105" > /etc/salt/minion.d/master.conf; \
+    echo "qa_minion_local_server" > /etc/salt/minion_id
+    
+#ENTRYPOINT salt-minion -d
+ENTRYPOINT tail -f /var/log/dpkg.log
+
+
+
+
+
+FROM saltstack/salt
+
+RUN echo "master: 192.168.56.105" > /etc/salt/minion.d/master.conf; \
+    echo "qa_minion_local_server" > /etc/salt/minion_id
+    
+ENTRYPOINT salt-minion -d
+CMD tail -f /var/log/dpkg.log
+
+
+
+
+
+
+
+ports:
+    - "4505:4505"
+    - "4506:4506"
+
+
+
+
+docker run --name QA-SALT-MINION --hostname QA-SALT-MINION -p 4505-4506:4505-4506 -p 8000:8000 -d ubuntu:salt-minion
+
+
+https://hub.docker.com/r/saltstack/salt/tags
+
+
+
+#USE UBUNTU AS BASE IMAGE
+
+FROM saltstack/salt
+
+#INSTALLATION
+#RUN apt-get update; apt install python3-pip -y; mkdir -p /etc/salt/{master.d,minion.d}; pip3 install salt
+
+#COPY A FILE FROM HOST TO CONTAINER
+COPY roots.conf /etc/salt/master.d/
+
+#START SALTMASTER SERVICE
+#ENTRYPOINT  ["salt-master","-d"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
